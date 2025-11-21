@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 
-export const API_URL = Platform.OS == "android" ? "http://192.168.1.3:5000" : "http://localhost:5000";
+export const API_URL = Platform.OS == "android" ? "https://whatsapp-clone-oidq.onrender.com" : "https://whatsapp-clone-oidq.onrender.com";
 
 export const CLOUDINARY_UPLOAD_PRESET = "image-upload";
 export const CLOUDINARY_CLOUD_NAME = "ddiirksy2";
