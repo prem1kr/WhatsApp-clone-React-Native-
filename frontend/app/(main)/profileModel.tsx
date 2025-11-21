@@ -42,7 +42,7 @@ const ProfileModel = () => {
         if (!userId || !token) return;
 
         const response = await axios.get(
-          `http://192.168.1.3:5000/api/auth/user/${userId}`,
+          `https://whatsapp-clone-oidq.onrender.com/api/auth/user/${userId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -107,7 +107,7 @@ const ProfileModel = () => {
       };
 
       await axios.put(
-        `http://192.168.1.3:5000/api/auth/user/${userId}`,
+        `https://whatsapp-clone-oidq.onrender.com/api/auth/user/${userId}`,
         updateData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
