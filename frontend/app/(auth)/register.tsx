@@ -1,4 +1,13 @@
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform, 
+  Pressable, 
+  ScrollView, 
+  StyleSheet, 
+  View, 
+  ActivityIndicator 
+} from 'react-native';
 import React, { useRef, useState } from 'react';
 import ScreenWrapper from '@/components/ScreenWrapper';
 import Typo from '@/components/Typo';
@@ -8,9 +17,34 @@ import Input from '@/components/Input';
 import * as Icons from 'phosphor-react-native';
 import { verticalScale } from '@/utils/styling';
 import { useRouter } from 'expo-router';
-import Button from '@/components/Button';
 import axios from 'axios';
 import { connectSocket } from '@/socket/socket';
+
+// Reusable Button with loading support
+const Button = ({ children, loading, onPress }) => {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={loading}
+      style={({ pressed }) => [
+        {
+          opacity: pressed || loading ? 0.7 : 1,
+          backgroundColor: colors.primaryLight,
+          paddingVertical: spacingY._15,
+          borderRadius: radius._15,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color={colors.black} />
+      ) : (
+        children
+      )}
+    </Pressable>
+  );
+};
 
 const Register = () => {
   const nameRef = useRef("");
@@ -28,12 +62,15 @@ const Register = () => {
 
     try {
       setIsLoading(true);
-      const response = await axios.post('http://192.168.1.3:5000/api/auth/register', {
-        name: nameRef.current,
-        email: emailRef.current,
-        password: passwordRef.current,
-        profileImage: profileImageRef.current || "",
-      });
+      const response = await axios.post(
+        'https://whatsapp-clone-oidq.onrender.com/api/auth/register', 
+        {
+          name: nameRef.current,
+          email: emailRef.current,
+          password: passwordRef.current,
+          profileImage: profileImageRef.current || "",
+        }
+      );
 
       if (response.status === 200) {
         Alert.alert("Success", response.data.message || "Account created successfully!");
@@ -52,7 +89,10 @@ const Register = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? "padding" : "height"}>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? "padding" : "height"}
+    >
       <ScreenWrapper showPattern={true}>
         <View style={styles.container}>
           <View style={styles.header}>
@@ -61,7 +101,10 @@ const Register = () => {
           </View>
 
           <View style={styles.content}>
-            <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              contentContainerStyle={styles.form} 
+              showsVerticalScrollIndicator={false}
+            >
               <View style={{ gap: spacingY._10, marginBottom: spacingY._15 }}>
                 <Typo size={28} fontWeight={"600"}>Getting Started</Typo>
                 <Typo color={colors.neutral600}>Create a new Account</Typo>
