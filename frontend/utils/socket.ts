@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'http://192.168.1.3:5000';
+const SOCKET_URL = 'https://whatsapp-clone-oidq.onrender.com';
 const socket = io(SOCKET_URL, {
   autoConnect: true,
 });
