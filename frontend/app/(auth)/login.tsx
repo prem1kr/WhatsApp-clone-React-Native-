@@ -1,14 +1,14 @@
-import { 
-  Alert, 
-  KeyboardAvoidingView, 
-  Platform, 
-  Pressable, 
-  ScrollView, 
-  StyleSheet, 
-  View, 
-  ActivityIndicator 
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
 } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenWrapper from '@/components/ScreenWrapper';
 import Typo from '@/components/Typo';
@@ -48,14 +48,31 @@ const Button = ({ children, loading, onPress }) => {
 };
 
 const Login = () => {
-  const emailRef = useRef("");
-  const passwordRef = useRef("");
+  const emailRef = useRef('');
+  const passwordRef = useRef('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // ✅ AUTO REDIRECT IF ALREADY LOGGED IN
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+
+        if (token) {
+          router.replace('/(main)/home');
+        }
+      } catch (error) {
+        console.log('Error checking login status:', error);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
-      Alert.alert("Login", "Please fill all the fields");
+      Alert.alert('Login', 'Please fill all the fields');
       return;
     }
 
@@ -72,23 +89,28 @@ const Login = () => {
 
       if (response.status === 200 && response.data.token) {
         const { message, user, token } = response.data;
-        Alert.alert("Success", message);
+
+        Alert.alert('Success', message);
 
         await AsyncStorage.setItem('userId', user._id);
         await AsyncStorage.setItem('token', token);
 
         await connectSocket();
 
-        router.push('/(main)/home');
+        router.replace('/(main)/home');
       } else {
-        Alert.alert("Login Failed", response.data.message || "Invalid credentials");
+        Alert.alert(
+          'Login Failed',
+          response.data.message || 'Invalid credentials'
+        );
       }
     } catch (err) {
-      console.error("Login Error:", err);
+      console.error('Login Error:', err);
+
       if (axios.isAxiosError(err) && err.response?.data?.message) {
-        Alert.alert("Login Failed", err.response.data.message);
+        Alert.alert('Login Failed', err.response.data.message);
       } else {
-        Alert.alert("Login Failed", "Something went wrong. Please try again.");
+        Alert.alert('Login Failed', 'Something went wrong. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -98,7 +120,7 @@ const Login = () => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? "padding" : "height"}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScreenWrapper showPattern={true}>
         <View style={styles.container}>
@@ -114,8 +136,13 @@ const Login = () => {
               contentContainerStyle={styles.form}
               showsHorizontalScrollIndicator={false}
             >
-              <View style={{ gap: spacingY._10, marginBottom: spacingY._15 }}>
-                <Typo size={28} fontWeight={"600"}>
+              <View
+                style={{
+                  gap: spacingY._10,
+                  marginBottom: spacingY._15,
+                }}
+              >
+                <Typo size={28} fontWeight={'600'}>
                   Getting Started
                 </Typo>
                 <Typo color={colors.neutral600}>
@@ -125,15 +152,25 @@ const Login = () => {
 
               <Input
                 placeholder="Enter your email"
-                onChangeText={(value: string) => emailRef.current = value}
-                icon={<Icons.At size={verticalScale(26)} color={colors.neutral600} />}
+                onChangeText={(value) => (emailRef.current = value)}
+                icon={
+                  <Icons.At
+                    size={verticalScale(26)}
+                    color={colors.neutral600}
+                  />
+                }
               />
 
               <Input
                 placeholder="Enter your password"
                 secureTextEntry
-                onChangeText={(value: string) => passwordRef.current = value}
-                icon={<Icons.LockIcon size={verticalScale(26)} color={colors.neutral600} />}
+                onChangeText={(value) => (passwordRef.current = value)}
+                icon={
+                  <Icons.LockIcon
+                    size={verticalScale(26)}
+                    color={colors.neutral600}
+                  />
+                }
               />
 
               <View style={{ marginTop: spacingY._25, gap: spacingY._15 }}>
@@ -145,8 +182,13 @@ const Login = () => {
 
                 <View style={styles.footer}>
                   <Typo>Don't have an account</Typo>
-                  <Pressable onPress={() => router.push("/(auth)/register")}>
-                    <Typo fontWeight={"bold"} color={colors.primaryDark}>
+                  <Pressable
+                    onPress={() => router.push('/(auth)/register')}
+                  >
+                    <Typo
+                      fontWeight={'bold'}
+                      color={colors.primaryDark}
+                    >
                       Sign Up
                     </Typo>
                   </Pressable>
@@ -165,22 +207,22 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   header: {
     paddingHorizontal: spacingX._20,
     paddingTop: spacingY._15,
     paddingBottom: spacingY._25,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
     backgroundColor: colors.white,
     borderTopLeftRadius: radius._50,
     borderTopRightRadius: radius._50,
-    borderCurve: "continuous",
+    borderCurve: 'continuous',
     paddingHorizontal: spacingX._20,
     paddingTop: spacingY._20,
   },
@@ -189,9 +231,9 @@ const styles = StyleSheet.create({
     marginTop: spacingY._20,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: 5,
   },
 });
