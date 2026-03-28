@@ -2,6 +2,8 @@ import authModel from "../model/auth.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config/jwt.js";
 dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -37,30 +39,53 @@ export const Register = async (req, res) => {
     }
 };
 
-export const Login = async (req, res) => {
-    const { email, password } = req.body;
-
+export const SignIn = async (req, res) => {
     try {
-        const user = await authModel.findOne({ email });
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and Password required" });
+        }
+
+        const user = await User.findOne({ email });
         if (!user) {
-            console.log(`User not found, register first: ${email}`);
-            return res.status(401).json({ message: "User not found, register first" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log("Password not matched");
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign({ user: { email: user.email, id: user._id, name: user.name } }, SECRET_KEY, { algorithm: 'HS256' });
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+        const token = jwt.sign(
+            {
+                user: { id: user._id, email: user.email, name: user.fullName, role: user.role }
+            },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
 
-        console.log(`Login successful: ${email}`);
-        return res.status(200).json({ message: "Login successfully", user, token });
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,         
+            sameSite: "None",      
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const safeUser = user.toObject();
+        delete safeUser.password;
+
+        return res.status(200).json({
+            message: "Login successful",
+            user: safeUser,
+            token
+        });
+
     } catch (error) {
-        console.error("Error during login process", error);
-        return res.status(500).json({ message: "Internal server error" });
+        console.error("SignIn error:", error);
+        return res.status(500).json({
+            message: `SignIn error: ${error.message}`
+        });
     }
 };
 
