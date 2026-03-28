@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/jwt.js";
 dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY;
